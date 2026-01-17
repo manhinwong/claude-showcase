@@ -1,1 +1,30 @@
-[]
+{
+  "builds": [
+    {
+      "id": "001",
+      "projectName": "[Your first project name]",
+      "builderName": "Marcus Chen",
+      "school": "UC Berkeley",
+      "githubUrl": "[your actual GitHub URL]",
+      "videoUrl": "[your actual YouTube/Loom URL]",
+      "description": "[2-3 sentence description, max 250 chars]",
+      "tags": ["productivity", "automation"],
+      "difficulty": "intermediate",
+      "submittedAt": "2026-01-16",
+      "featured": true
+    },
+    {
+      "id": "002",
+      "projectName": "[Your second project name]",
+      "builderName": "[Builder name]",
+      "school": "UC Berkeley",
+      "githubUrl": "[GitHub URL]",
+      "videoUrl": "[YouTube/Loom URL]",
+      "description": "[2-3 sentence description]",
+      "tags": ["creative", "tool"],
+      "difficulty": "beginner",
+      "submittedAt": "2026-01-15",
+      "featured": false
+    }
+  ]
+}
