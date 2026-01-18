@@ -1,3 +1,8 @@
+"use client";
+
+import { useState } from "react";
+import VideoModal from "./VideoModal";
+
 interface BuildCardProps {
   projectName: string;
   builderName: string;
@@ -37,25 +42,14 @@ const cardTagColorMap: Record<string, string[]> = {
   "bg-warm-lavender": ["creative"],
 };
 
-function getEmbedUrl(url: string): string | null {
-  if (!url || url.startsWith("[")) return null;
-
-  // YouTube: youtube.com/watch?v=ID or youtu.be/ID
-  const youtubeMatch = url.match(
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/
-  );
-  if (youtubeMatch) {
-    return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
-  }
-
-  // Loom: loom.com/share/ID
-  const loomMatch = url.match(/loom\.com\/share\/([a-zA-Z0-9]+)/);
-  if (loomMatch) {
-    return `https://www.loom.com/embed/${loomMatch[1]}`;
-  }
-
-  return null;
-}
+// Map card colors to their gradient colors for description fade
+const cardGradientMap: Record<string, string> = {
+  "bg-warm-pink": "from-[#E8B4BC]",
+  "bg-warm-green": "from-[#9CAF88]",
+  "bg-warm-blue": "from-[#7BA3BC]",
+  "bg-warm-coral": "from-[#D4896C]",
+  "bg-warm-lavender": "from-[#C4B5D4]",
+};
 
 export default function BuildCard({
   projectName,
@@ -67,82 +61,80 @@ export default function BuildCard({
   videoUrl,
   colorClass = "bg-warm-pink",
 }: BuildCardProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const isLongDescription = description.length > 150;
+  const gradientColor = cardGradientMap[colorClass] || "from-[#E8B4BC]";
 
   return (
-    <div
-      className={`relative rounded-xl sm:rounded-2xl p-4 sm:p-6 transition-all duration-300 ease-out hover:scale-[1.02] sm:hover:scale-105 hover:shadow-xl hover:shadow-warm-text/15 ${colorClass}`}
-    >
-      <div className="space-y-3 sm:space-y-4">
-        <div>
-          <h3 className="text-xl sm:text-2xl font-serif font-semibold text-warm-text mb-1">
-            {projectName}
-          </h3>
-          <p className="text-sm text-warm-text/60 font-sans">
-            {builderName} · {school}
-          </p>
-        </div>
-
-        <div className="relative">
-          <p className="text-sm sm:text-base text-warm-text/80 font-sans leading-relaxed">
-            {description}
-          </p>
-          {isLongDescription && (
-            <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white/40 to-transparent pointer-events-none" />
-          )}
-        </div>
-
-        {getEmbedUrl(videoUrl) && (
-          <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-warm-text/10 shadow-md">
-            <iframe
-              src={getEmbedUrl(videoUrl)!}
-              title={`${projectName} demo`}
-              className="absolute inset-0 w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+    <>
+      <div
+        className={`relative rounded-xl sm:rounded-2xl p-4 sm:p-6 transition-all duration-300 ease-out hover:scale-[1.02] sm:hover:scale-105 hover:shadow-xl hover:shadow-warm-text/15 ${colorClass}`}
+      >
+        <div className="space-y-3 sm:space-y-4">
+          <div>
+            <h3 className="text-xl sm:text-2xl font-serif font-semibold text-warm-text mb-1">
+              {projectName}
+            </h3>
+            <p className="text-sm text-warm-text/60 font-sans">
+              {builderName} · {school}
+            </p>
           </div>
-        )}
 
-        <div className="flex flex-wrap gap-2">
-          {tags.map((tag) => {
-            // Check if this tag's color matches the card background
-            const clashingTags = cardTagColorMap[colorClass] || [];
-            const usesAltStyle = clashingTags.includes(tag);
-            const tagClass = usesAltStyle
-              ? (tagAltStyles[tag] || "bg-white/90 text-warm-text border border-warm-text/20")
-              : (tagStyles[tag] || "bg-white/40 text-warm-text");
+          <div className="relative">
+            <p className="text-sm sm:text-base text-warm-text/80 font-sans leading-relaxed">
+              {description}
+            </p>
+            {isLongDescription && (
+              <div className={`absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t ${gradientColor} to-transparent pointer-events-none`} />
+            )}
+          </div>
 
-            return (
-              <span
-                key={tag}
-                className={`px-2.5 sm:px-3 py-1 text-[13px] sm:text-sm rounded-full ${tagClass}`}
-              >
-                {tag}
-              </span>
-            );
-          })}
-        </div>
+          <div className="flex flex-wrap gap-2">
+            {tags.map((tag) => {
+              // Check if this tag's color matches the card background
+              const clashingTags = cardTagColorMap[colorClass] || [];
+              const usesAltStyle = clashingTags.includes(tag);
+              const tagClass = usesAltStyle
+                ? (tagAltStyles[tag] || "bg-white/90 text-warm-text border border-warm-text/20")
+                : (tagStyles[tag] || "bg-white/40 text-warm-text");
 
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
-          <a
-            href={videoUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center min-h-[48px] sm:min-h-[44px] px-5 py-3 bg-warm-coral text-white text-sm font-semibold rounded-xl hover:bg-[#c47a5f] active:bg-[#b86f55] transition-colors shadow-md"
-          >
-            View Demo
-          </a>
-          <a
-            href={githubUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center min-h-[48px] sm:min-h-[44px] px-5 py-3 bg-[#F7F5F2] text-warm-text text-sm font-semibold rounded-xl hover:bg-[#F5F3EF] active:bg-[#F0EDE8] transition-colors border border-warm-text/10"
-          >
-            View Code
-          </a>
+              return (
+                <span
+                  key={tag}
+                  className={`px-2.5 sm:px-3 py-1 text-[13px] sm:text-sm rounded-full ${tagClass}`}
+                >
+                  {tag}
+                </span>
+              );
+            })}
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="flex-1 flex items-center justify-center min-h-[48px] sm:min-h-[44px] px-5 py-3 bg-warm-coral text-white text-sm font-semibold rounded-xl hover:bg-[#c47a5f] active:bg-[#b86f55] transition-colors shadow-md"
+            >
+              View Demo
+            </button>
+            <a
+              href={githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center min-h-[48px] sm:min-h-[44px] px-5 py-3 bg-[#F7F5F2] text-warm-text text-sm font-semibold rounded-xl hover:bg-[#EBE8E1] active:bg-[#DDD9D0] transition-colors border border-warm-text/10"
+            >
+              View Code
+            </a>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Video Modal */}
+      <VideoModal
+        videoUrl={videoUrl}
+        projectName={projectName}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
+    </>
   );
 }

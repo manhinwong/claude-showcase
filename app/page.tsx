@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import BuildCard from "../components/BuildCard";
 import FilterBar from "../components/FilterBar";
 import buildsData from "../data/builds.json";
@@ -55,10 +56,26 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-warm-bg">
       <header className="bg-warm-bg border-b border-warm-text/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl font-serif text-warm-text">Claude</span>
-            <span className="text-2xl font-serif text-warm-text/70">Showcase</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2">
+              <span className="text-xl sm:text-2xl font-serif text-warm-text">Claude</span>
+              <span className="text-xl sm:text-2xl font-serif text-warm-text/70">Showcase</span>
+            </Link>
+            <nav className="flex items-center gap-2 sm:gap-4">
+              <Link
+                href="/"
+                className="px-3 sm:px-4 py-2 text-sm font-medium text-warm-text/70 hover:text-warm-text transition-colors"
+              >
+                Gallery
+              </Link>
+              <Link
+                href="/submit"
+                className="px-4 sm:px-5 py-2.5 text-sm font-semibold bg-warm-coral text-white rounded-xl hover:bg-[#c47a5f] active:bg-[#b86f55] transition-colors shadow-sm"
+              >
+                Submit Build
+              </Link>
+            </nav>
           </div>
         </div>
       </header>
