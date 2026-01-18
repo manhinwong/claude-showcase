@@ -42,15 +42,6 @@ const cardTagColorMap: Record<string, string[]> = {
   "bg-warm-lavender": ["creative"],
 };
 
-// Map card colors to their gradient colors for description fade
-const cardGradientMap: Record<string, string> = {
-  "bg-warm-pink": "from-[#E8B4BC]",
-  "bg-warm-green": "from-[#9CAF88]",
-  "bg-warm-blue": "from-[#7BA3BC]",
-  "bg-warm-coral": "from-[#D4896C]",
-  "bg-warm-lavender": "from-[#C4B5D4]",
-};
-
 export default function BuildCard({
   projectName,
   builderName,
@@ -62,8 +53,6 @@ export default function BuildCard({
   colorClass = "bg-warm-pink",
 }: BuildCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const isLongDescription = description.length > 150;
-  const gradientColor = cardGradientMap[colorClass] || "from-[#E8B4BC]";
 
   return (
     <>
@@ -80,13 +69,10 @@ export default function BuildCard({
             </p>
           </div>
 
-          <div className="relative">
+          <div>
             <p className="text-sm sm:text-base text-warm-text/80 font-sans leading-relaxed">
               {description}
             </p>
-            {isLongDescription && (
-              <div className={`absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t ${gradientColor} to-transparent pointer-events-none`} />
-            )}
           </div>
 
           <div className="flex flex-wrap gap-2">
