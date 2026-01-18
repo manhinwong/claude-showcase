@@ -6,22 +6,35 @@ interface BuildCardProps {
   tags: string[];
   githubUrl: string;
   videoUrl: string;
-  difficulty: string;
+  colorClass?: string;
 }
 
-const tagColors: Record<string, string> = {
-  productivity: "bg-blue-100 text-blue-800",
-  automation: "bg-green-100 text-green-800",
-  creative: "bg-purple-100 text-purple-800",
-  tool: "bg-orange-100 text-orange-800",
-  "data analysis": "bg-yellow-100 text-yellow-800",
-  game: "bg-red-100 text-red-800",
+const tagStyles: Record<string, string> = {
+  productivity: "bg-warm-blue text-white font-medium shadow-sm",
+  automation: "bg-warm-coral text-white font-medium shadow-sm",
+  creative: "bg-warm-lavender text-white font-medium shadow-sm",
+  tool: "bg-warm-pink text-white font-medium shadow-sm",
+  "data analysis": "bg-warm-blue text-white font-medium shadow-sm",
+  game: "bg-warm-pink text-white font-medium shadow-sm",
 };
 
-const difficultyColors: Record<string, string> = {
-  beginner: "bg-green-500 text-white",
-  intermediate: "bg-yellow-500 text-white",
-  advanced: "bg-red-500 text-white",
+// Alternative styles when tag color matches card background - use darker shade with white text
+const tagAltStyles: Record<string, string> = {
+  productivity: "bg-[#5a7a94] text-white font-medium shadow-md border border-white/20",
+  automation: "bg-[#b86f55] text-white font-medium shadow-md border border-white/20",
+  creative: "bg-[#a594b4] text-white font-medium shadow-md border border-white/20",
+  tool: "bg-[#d89aa4] text-white font-medium shadow-md border border-white/20",
+  "data analysis": "bg-[#5a7a94] text-white font-medium shadow-md border border-white/20",
+  game: "bg-[#d89aa4] text-white font-medium shadow-md border border-white/20",
+};
+
+// Map card colors to tag types that would clash
+const cardTagColorMap: Record<string, string[]> = {
+  "bg-warm-pink": ["game", "tool"],
+  "bg-warm-green": [],
+  "bg-warm-blue": ["productivity", "data analysis"],
+  "bg-warm-coral": ["automation"],
+  "bg-warm-lavender": ["creative"],
 };
 
 function getEmbedUrl(url: string): string | null {
@@ -52,70 +65,83 @@ export default function BuildCard({
   tags,
   githubUrl,
   videoUrl,
-  difficulty,
+  colorClass = "bg-warm-pink",
 }: BuildCardProps) {
+  const isLongDescription = description.length > 150;
+
   return (
-    <div className="relative border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:scale-[1.02] transition-all duration-200 bg-white">
-      <span
-        className={`absolute top-3 right-3 px-2 py-1 text-xs font-medium rounded-full ${
-          difficultyColors[difficulty] || "bg-gray-500 text-white"
-        }`}
-      >
-        {difficulty}
-      </span>
-
-      <h3 className="text-lg font-semibold text-gray-900 pr-20 mb-1">
-        {projectName}
-      </h3>
-
-      <p className="text-sm text-gray-600 mb-3">
-        {builderName} · {school}
-      </p>
-
-      <p className="text-sm text-gray-700 mb-4">{description}</p>
-
-      {getEmbedUrl(videoUrl) && (
-        <div className="relative w-full aspect-video mb-4 rounded-lg overflow-hidden bg-gray-100">
-          <iframe
-            src={getEmbedUrl(videoUrl)!}
-            title={`${projectName} demo`}
-            className="absolute inset-0 w-full h-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+    <div
+      className={`relative rounded-xl sm:rounded-2xl p-4 sm:p-6 transition-all duration-300 ease-out hover:scale-[1.02] sm:hover:scale-105 hover:shadow-xl hover:shadow-warm-text/15 ${colorClass}`}
+    >
+      <div className="space-y-3 sm:space-y-4">
+        <div>
+          <h3 className="text-xl sm:text-2xl font-serif font-semibold text-warm-text mb-1">
+            {projectName}
+          </h3>
+          <p className="text-sm text-warm-text/60 font-sans">
+            {builderName} · {school}
+          </p>
         </div>
-      )}
 
-      <div className="flex flex-wrap gap-2 mb-4">
-        {tags.map((tag) => (
-          <span
-            key={tag}
-            className={`px-2 py-1 text-xs font-medium rounded-full ${
-              tagColors[tag] || "bg-gray-100 text-gray-800"
-            }`}
+        <div className="relative">
+          <p className="text-sm sm:text-base text-warm-text/80 font-sans leading-relaxed">
+            {description}
+          </p>
+          {isLongDescription && (
+            <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white/40 to-transparent pointer-events-none" />
+          )}
+        </div>
+
+        {getEmbedUrl(videoUrl) && (
+          <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-warm-text/10 shadow-md">
+            <iframe
+              src={getEmbedUrl(videoUrl)!}
+              title={`${projectName} demo`}
+              className="absolute inset-0 w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        )}
+
+        <div className="flex flex-wrap gap-2">
+          {tags.map((tag) => {
+            // Check if this tag's color matches the card background
+            const clashingTags = cardTagColorMap[colorClass] || [];
+            const usesAltStyle = clashingTags.includes(tag);
+            const tagClass = usesAltStyle
+              ? (tagAltStyles[tag] || "bg-white/90 text-warm-text border border-warm-text/20")
+              : (tagStyles[tag] || "bg-white/40 text-warm-text");
+
+            return (
+              <span
+                key={tag}
+                className={`px-2.5 sm:px-3 py-1 text-[13px] sm:text-sm rounded-full ${tagClass}`}
+              >
+                {tag}
+              </span>
+            );
+          })}
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
+          <a
+            href={videoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 flex items-center justify-center min-h-[48px] sm:min-h-[44px] px-5 py-3 bg-warm-coral text-white text-sm font-semibold rounded-xl hover:bg-[#c47a5f] active:bg-[#b86f55] transition-colors shadow-md"
           >
-            {tag}
-          </span>
-        ))}
-      </div>
-
-      <div className="flex flex-col sm:flex-row gap-2">
-        <a
-          href={videoUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-1 text-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          View Demo
-        </a>
-        <a
-          href={githubUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-1 text-center px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          View Code
-        </a>
+            View Demo
+          </a>
+          <a
+            href={githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 flex items-center justify-center min-h-[48px] sm:min-h-[44px] px-5 py-3 bg-[#F7F5F2] text-warm-text text-sm font-semibold rounded-xl hover:bg-[#F5F3EF] active:bg-[#F0EDE8] transition-colors border border-warm-text/10"
+          >
+            View Code
+          </a>
+        </div>
       </div>
     </div>
   );

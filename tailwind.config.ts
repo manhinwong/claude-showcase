@@ -11,6 +11,19 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        warm: {
+          bg: "#F7F5F2",
+          text: "#2C2416",
+          pink: "#E8B4BC",
+          green: "#9CAF88",
+          blue: "#7BA3BC",
+          coral: "#D4896C",
+          lavender: "#C4B5D4",
+        },
+      },
+      fontFamily: {
+        serif: ["'Freight Text Pro'", "Georgia", "serif"],
+        sans: ["Inter", "system-ui", "sans-serif"],
       },
     },
   },
