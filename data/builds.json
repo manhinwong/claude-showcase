@@ -2,14 +2,13 @@
   "builds": [
     {
       "id": "001",
-      "projectName": "Task Automation CLI",
-      "builderName": "Oski Bear",
+      "projectName": "Postcard Generator",
+      "builderName": "Marcus Wong",
       "school": "UC Berkeley",
-      "githubUrl": "https://github.com/example/task-automation-cli",
-      "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      "description": "A command-line tool that automates repetitive development tasks like code formatting, testing, and deployment. Built with Claude Code to help developers save time and reduce errors in their daily workflow.",
-      "tags": ["productivity", "automation"],
-      "difficulty": "intermediate",
+      "githubUrl": "https://github.com/manhinwong/postcards-demo/",
+      "videoUrl": "https://www.loom.com/share/806fb18140194bb2997cd51289c8c422",
+      "description": "A web app for creating personalized digital postcards with photos, messages, and memories. Customization coming soon!",
+      "tags": ["creative"],
       "submittedAt": "2026-01-16",
       "featured": true
     },
@@ -22,7 +21,6 @@
       "videoUrl": "https://youtu.be/dQw4w9WgXcQ",
       "description": "An interactive storytelling application that uses AI to generate creative narratives based on user prompts. Features multiple genres and customizable story parameters for endless creative possibilities.",
       "tags": ["creative", "tool"],
-      "difficulty": "beginner",
       "submittedAt": "2026-01-15",
       "featured": false
     },
@@ -35,7 +33,6 @@
       "videoUrl": "https://www.loom.com/share/abc123def456",
       "description": "A real-time data visualization dashboard that transforms complex datasets into interactive charts and graphs. Built for data scientists and analysts who need quick insights from their data.",
       "tags": ["data analysis", "tool"],
-      "difficulty": "advanced",
       "submittedAt": "2026-01-14",
       "featured": true
     },
@@ -48,7 +45,6 @@
       "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       "description": "An automated code review tool that analyzes pull requests and provides intelligent feedback on code quality, potential bugs, and best practices. Integrates seamlessly with GitHub workflows.",
       "tags": ["productivity", "automation", "tool"],
-      "difficulty": "intermediate",
       "submittedAt": "2026-01-13",
       "featured": false
     },
@@ -61,7 +57,6 @@
       "videoUrl": "https://youtu.be/dQw4w9WgXcQ",
       "description": "A browser-based pixel art editor with intuitive tools for creating retro-style graphics. Features include layer support, color palettes, and export options for game development.",
       "tags": ["creative", "game"],
-      "difficulty": "beginner",
       "submittedAt": "2026-01-12",
       "featured": false
     },
@@ -74,7 +69,6 @@
       "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       "description": "Automatically transcribes and organizes meeting recordings into searchable, actionable notes with AI-powered summaries and action item extraction.",
       "tags": ["productivity", "tool"],
-      "difficulty": "advanced",
       "submittedAt": "2026-01-11",
       "featured": true
     }
