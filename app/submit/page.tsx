@@ -4,10 +4,87 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 
 const schools = [
-  "UC Berkeley",
-  "Stanford",
-  "MIT",
-  "Carnegie Mellon",
+  "African Leadership University Rwanda",
+  "Arizona State University Campus Immersion",
+  "California Institute of Technology",
+  "Carnegie Mellon University",
+  "Champlain College",
+  "Columbia University in the City of New York",
+  "Cornell University",
+  "Dartmouth College",
+  "Duke University",
+  "ETH Zurich",
+  "Georgetown University",
+  "Georgia Institute of Technology-Main Campus",
+  "Harvard University",
+  "Illinois Institute of Technology",
+  "Imperial College London",
+  "Indian Institute of Technology Madras",
+  "Indiana University-Bloomington",
+  "Johns Hopkins University",
+  "Kwame Nkrumah University of Science & Technology",
+  "London Business School",
+  "Makerere University",
+  "Massachusetts Institute of Technology",
+  "McGill University",
+  "Michigan State University",
+  "Mila - Quebec Artificial Intelligence Institute",
+  "Minnesota State University-Mankato",
+  "New Jersey Institute of Technology",
+  "New York University",
+  "Northeastern University",
+  "Northumbria University",
+  "Northwestern University",
+  "Ohio State University-Main Campus",
+  "Pennsylvania State University-Main Campus",
+  "Princeton University",
+  "Purdue University-Main Campus",
+  "Rice University",
+  "Stanford University",
+  "Syracuse University",
+  "Technical University of Munich",
+  "The London School of Economics and Political Science",
+  "The University of Edinburgh",
+  "The University of Texas at Austin",
+  "Trinity College Dublin",
+  "Université Cheikh Anta Diop de Dakar",
+  "University College Cork",
+  "University College London",
+  "University of California-Berkeley",
+  "University of California-Irvine",
+  "University of California-Los Angeles",
+  "University of California-San Diego",
+  "University of Cambridge",
+  "University of Cape Town",
+  "University of Chicago",
+  "University of Exeter",
+  "University of Florida",
+  "University of Georgia",
+  "University of Ghana",
+  "University of Illinois Urbana-Champaign",
+  "University of Lagos",
+  "University of Louisville",
+  "University of Maryland-College Park",
+  "University of Massachusetts-Amherst",
+  "University of Michigan-Ann Arbor",
+  "University of Missouri-Columbia",
+  "University of Nairobi",
+  "University of Nevada-Las Vegas",
+  "University of North Carolina at Chapel Hill",
+  "University of Oxford",
+  "University of Pennsylvania",
+  "University of Pittsburgh-Pittsburgh Campus",
+  "University of Rwanda",
+  "University of San Francisco",
+  "University of Southern California",
+  "University of Toronto St. George",
+  "University of Victoria",
+  "University of Virginia-Main Campus",
+  "University of Washington-Seattle Campus",
+  "University of Waterloo",
+  "University of Wisconsin-Madison",
+  "Vanderbilt University",
+  "Yale University",
   "Other",
 ];
 
@@ -24,6 +101,7 @@ interface FormData {
   projectName: string;
   builderName: string;
   school: string;
+  customSchool: string;
   githubUrl: string;
   videoUrl: string;
   description: string;
@@ -34,6 +112,7 @@ interface FormErrors {
   projectName?: string;
   builderName?: string;
   school?: string;
+  customSchool?: string;
   githubUrl?: string;
   videoUrl?: string;
   description?: string;
@@ -45,6 +124,7 @@ export default function SubmitPage() {
     projectName: "",
     builderName: "",
     school: "",
+    customSchool: "",
     githubUrl: "",
     videoUrl: "",
     description: "",
@@ -80,20 +160,57 @@ export default function SubmitPage() {
           return "Please select your school";
         }
         break;
+      case "customSchool":
+        if (formData.school === "Other") {
+          if (!value || (value as string).trim() === "") {
+            return "Please enter your school name";
+          }
+          if ((value as string).length > 100) {
+            return "School name must be 100 characters or less";
+          }
+        }
+        break;
       case "githubUrl":
         if (!value || (value as string).trim() === "") {
           return "GitHub URL is required";
         }
-        if (!(value as string).startsWith("https://github.com/")) {
-          return "Please enter a valid GitHub URL starting with https://github.com/";
+        try {
+          const url = new URL((value as string).trim());
+          if (url.hostname !== 'github.com' && url.hostname !== 'www.github.com') {
+            return "Please enter a valid GitHub URL";
+          }
+          if (url.protocol !== 'https:') {
+            return "GitHub URL must use HTTPS";
+          }
+          // Validate path format: /username/repo
+          const pathParts = url.pathname.split('/').filter(p => p.length > 0);
+          if (pathParts.length < 2) {
+            return "Please enter a complete GitHub repository URL (https://github.com/username/repo)";
+          }
+        } catch {
+          return "Please enter a valid URL";
         }
         break;
       case "videoUrl":
         if (!value || (value as string).trim() === "") {
           return "Video demo URL is required";
         }
-        if (!(value as string).includes("youtube.com") && !(value as string).includes("youtu.be") && !(value as string).includes("loom.com")) {
-          return "Please enter a valid YouTube or Loom URL";
+        try {
+          const url = new URL((value as string).trim());
+          const isYouTube = url.hostname === 'www.youtube.com' ||
+                            url.hostname === 'youtube.com' ||
+                            url.hostname === 'youtu.be';
+          const isLoom = url.hostname === 'www.loom.com' ||
+                         url.hostname === 'loom.com';
+
+          if (!isYouTube && !isLoom) {
+            return "Please enter a valid YouTube or Loom URL";
+          }
+          if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+            return "URL must use HTTP or HTTPS";
+          }
+        } catch {
+          return "Please enter a valid URL";
         }
         break;
       case "description":
@@ -142,6 +259,18 @@ export default function SubmitPage() {
       const error = validateField(name, value);
       setErrors((prev) => ({ ...prev, [name]: error }));
     }
+
+    // When school changes to "Other", mark customSchool as touched and validate
+    if (name === "school") {
+      if (value === "Other") {
+        setTouched((prev) => ({ ...prev, customSchool: true }));
+        const customSchoolError = validateField("customSchool", formData.customSchool);
+        setErrors((prev) => ({ ...prev, customSchool: customSchoolError }));
+      } else {
+        // Clear customSchool errors when switching away from "Other"
+        setErrors((prev) => ({ ...prev, customSchool: undefined }));
+      }
+    }
   };
 
   const handleBlur = (
@@ -154,6 +283,12 @@ export default function SubmitPage() {
   };
 
   const handleTagChange = (tag: string) => {
+    // Validate tag is in allowed list
+    if (!tagOptions.includes(tag)) {
+      console.error(`Invalid tag attempted: ${tag}`);
+      return;
+    }
+
     setTouched((prev) => ({ ...prev, tags: true }));
     const newTags = formData.tags.includes(tag)
       ? formData.tags.filter((t) => t !== tag)
@@ -179,7 +314,21 @@ export default function SubmitPage() {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      console.log("Form submission:", JSON.stringify(formData, null, 2));
+      // Prepare submission data with customSchool replacing "Other"
+      const submissionData = {
+        projectName: formData.projectName.trim(),
+        builderName: formData.builderName.trim(),
+        school: formData.school === "Other" ? formData.customSchool.trim() : formData.school,
+        githubUrl: formData.githubUrl.trim(),
+        videoUrl: formData.videoUrl.trim(),
+        description: formData.description.trim(),
+        tags: formData.tags,
+      };
+
+      // Only log in development
+      if (process.env.NODE_ENV === 'development') {
+        console.log("Form submission:", JSON.stringify(submissionData, null, 2));
+      }
 
       setIsSubmitting(false);
       setShowSuccessModal(true);
@@ -188,6 +337,7 @@ export default function SubmitPage() {
         projectName: "",
         builderName: "Marcus Chen",
         school: "",
+        customSchool: "",
         githubUrl: "",
         videoUrl: "",
         description: "",
@@ -199,12 +349,42 @@ export default function SubmitPage() {
   };
 
   const isFormValid = (): boolean => {
+    const schoolValid =
+      formData.school !== "" &&
+      (formData.school !== "Other" || formData.customSchool.trim() !== "");
+
+    // Validate GitHub URL properly
+    let githubValid = false;
+    try {
+      const githubUrl = new URL(formData.githubUrl.trim());
+      githubValid = (githubUrl.hostname === 'github.com' || githubUrl.hostname === 'www.github.com') &&
+                    githubUrl.protocol === 'https:' &&
+                    githubUrl.pathname.split('/').filter(p => p.length > 0).length >= 2;
+    } catch {
+      githubValid = false;
+    }
+
+    // Validate video URL properly
+    let videoValid = false;
+    try {
+      const videoUrl = new URL(formData.videoUrl.trim());
+      const isYouTube = videoUrl.hostname === 'www.youtube.com' ||
+                        videoUrl.hostname === 'youtube.com' ||
+                        videoUrl.hostname === 'youtu.be';
+      const isLoom = videoUrl.hostname === 'www.loom.com' ||
+                     videoUrl.hostname === 'loom.com';
+      videoValid = (isYouTube || isLoom) &&
+                   (videoUrl.protocol === 'https:' || videoUrl.protocol === 'http:');
+    } catch {
+      videoValid = false;
+    }
+
     return (
       formData.projectName.trim() !== "" &&
       formData.builderName.trim() !== "" &&
-      formData.school !== "" &&
-      formData.githubUrl.startsWith("https://github.com/") &&
-      (formData.videoUrl.includes("youtube.com") || formData.videoUrl.includes("youtu.be") || formData.videoUrl.includes("loom.com")) &&
+      schoolValid &&
+      githubValid &&
+      videoValid &&
       formData.description.length >= 50 &&
       formData.description.length <= 250 &&
       formData.tags.length > 0
@@ -215,9 +395,43 @@ export default function SubmitPage() {
     const reasons: string[] = [];
     if (formData.projectName.trim() === "") reasons.push("Project name");
     if (formData.builderName.trim() === "") reasons.push("Builder name");
-    if (formData.school === "") reasons.push("School");
-    if (!formData.githubUrl.startsWith("https://github.com/")) reasons.push("Valid GitHub URL");
-    if (!formData.videoUrl.includes("youtube.com") && !formData.videoUrl.includes("youtu.be") && !formData.videoUrl.includes("loom.com")) reasons.push("Valid video URL");
+    if (formData.school === "") {
+      reasons.push("School");
+    } else if (formData.school === "Other" && formData.customSchool.trim() === "") {
+      reasons.push("Custom school name");
+    }
+
+    // Validate GitHub URL
+    try {
+      const githubUrl = new URL(formData.githubUrl.trim());
+      if (githubUrl.hostname !== 'github.com' && githubUrl.hostname !== 'www.github.com') {
+        reasons.push("Valid GitHub URL");
+      } else if (githubUrl.protocol !== 'https:') {
+        reasons.push("GitHub URL must use HTTPS");
+      } else if (githubUrl.pathname.split('/').filter(p => p.length > 0).length < 2) {
+        reasons.push("Complete GitHub repo URL");
+      }
+    } catch {
+      reasons.push("Valid GitHub URL");
+    }
+
+    // Validate video URL
+    try {
+      const videoUrl = new URL(formData.videoUrl.trim());
+      const isYouTube = videoUrl.hostname === 'www.youtube.com' ||
+                        videoUrl.hostname === 'youtube.com' ||
+                        videoUrl.hostname === 'youtu.be';
+      const isLoom = videoUrl.hostname === 'www.loom.com' ||
+                     videoUrl.hostname === 'loom.com';
+      if (!isYouTube && !isLoom) {
+        reasons.push("Valid YouTube or Loom URL");
+      } else if (videoUrl.protocol !== 'https:' && videoUrl.protocol !== 'http:') {
+        reasons.push("Valid video URL protocol");
+      }
+    } catch {
+      reasons.push("Valid video URL");
+    }
+
     if (formData.description.length < 50) reasons.push("Description (50+ chars)");
     if (formData.tags.length === 0) reasons.push("At least one tag");
     return reasons;
@@ -454,6 +668,41 @@ export default function SubmitPage() {
                   </svg>
                   {errors.school}
                 </p>
+              )}
+
+              {/* Custom School Input - shown when "Other" is selected */}
+              {formData.school === "Other" && (
+                <div className="mt-4">
+                  <label
+                    htmlFor="customSchool"
+                    className="block text-sm font-semibold text-warm-text mb-2"
+                  >
+                    Your School <span className="text-warm-coral">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="customSchool"
+                    name="customSchool"
+                    value={formData.customSchool}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    maxLength={100}
+                    placeholder="Enter your school name"
+                    className={`w-full px-4 py-3.5 text-base text-warm-text bg-warm-bg border-2 rounded-xl placeholder:text-warm-text/40 focus:outline-none transition-colors ${
+                      errors.customSchool && touched.customSchool
+                        ? "border-red-400 focus:border-red-400"
+                        : "border-transparent focus:border-warm-coral"
+                    }`}
+                  />
+                  {errors.customSchool && touched.customSchool && (
+                    <p className="mt-2 text-sm text-red-500 flex items-center gap-1.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      {errors.customSchool}
+                    </p>
+                  )}
+                </div>
               )}
             </div>
 

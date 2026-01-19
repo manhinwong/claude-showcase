@@ -172,6 +172,7 @@ export default function VideoModal({
             src={embedUrl}
             title={`${projectName} demo video`}
             className="absolute inset-0 w-full h-full"
+            sandbox="allow-scripts allow-same-origin allow-presentation"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
           />

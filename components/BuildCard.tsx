@@ -57,9 +57,9 @@ export default function BuildCard({
   return (
     <>
       <div
-        className={`relative rounded-xl sm:rounded-2xl p-4 sm:p-6 transition-all duration-300 ease-out hover:scale-[1.02] sm:hover:scale-105 hover:shadow-xl hover:shadow-warm-text/15 ${colorClass}`}
+        className={`relative rounded-xl sm:rounded-2xl p-4 sm:p-6 transition-all duration-300 ease-out hover:scale-[1.02] sm:hover:scale-105 hover:shadow-xl hover:shadow-warm-text/15 flex flex-col ${colorClass}`}
       >
-        <div className="space-y-3 sm:space-y-4">
+        <div className="flex-1 flex flex-col space-y-3 sm:space-y-4">
           <div>
             <h3 className="text-xl sm:text-2xl font-serif font-semibold text-warm-text mb-1">
               {projectName}
@@ -69,7 +69,7 @@ export default function BuildCard({
             </p>
           </div>
 
-          <div>
+          <div className="flex-1">
             <p className="text-sm sm:text-base text-warm-text/80 font-sans leading-relaxed">
               {description}
             </p>
