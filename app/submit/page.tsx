@@ -442,7 +442,7 @@ export default function SubmitPage() {
     let githubValid = true;
     if (hasGithub && formData.githubUrl) {
       try {
-        const url = new URL(formData.githubUrl.trim());
+        const url = new URL(normalizeUrl(formData.githubUrl));
         githubValid = (url.hostname === 'github.com' || url.hostname === 'www.github.com') &&
                       url.protocol === 'https:' &&
                       url.pathname.split('/').filter(p => p.length > 0).length >= 2;
@@ -454,7 +454,7 @@ export default function SubmitPage() {
     let websiteValid = true;
     if (hasWebsite && formData.websiteUrl) {
       try {
-        const url = new URL(formData.websiteUrl.trim());
+        const url = new URL(normalizeUrl(formData.websiteUrl));
         websiteValid = url.protocol === 'https:' || url.protocol === 'http:';
       } catch {
         websiteValid = false;
@@ -464,7 +464,7 @@ export default function SubmitPage() {
     let artifactValid = true;
     if (hasArtifact && formData.artifactUrl) {
       try {
-        const url = new URL(formData.artifactUrl.trim());
+        const url = new URL(normalizeUrl(formData.artifactUrl));
         artifactValid = url.hostname === 'claude.ai' &&
                        url.pathname.startsWith('/artifacts/') &&
                        url.protocol === 'https:';
@@ -478,19 +478,21 @@ export default function SubmitPage() {
       (hasWebsite && websiteValid) ||
       (hasArtifact && artifactValid);
 
-    // Validate video URL properly
-    let videoValid = false;
-    try {
-      const videoUrl = new URL(formData.videoUrl.trim());
-      const isYouTube = videoUrl.hostname === 'www.youtube.com' ||
-                        videoUrl.hostname === 'youtube.com' ||
-                        videoUrl.hostname === 'youtu.be';
-      const isLoom = videoUrl.hostname === 'www.loom.com' ||
-                     videoUrl.hostname === 'loom.com';
-      videoValid = (isYouTube || isLoom) &&
-                   (videoUrl.protocol === 'https:' || videoUrl.protocol === 'http:');
-    } catch {
-      videoValid = false;
+    // Validate video URL - optional, only validate if provided
+    let videoValid = true;
+    if (formData.videoUrl && formData.videoUrl.trim() !== '') {
+      try {
+        const videoUrl = new URL(normalizeUrl(formData.videoUrl));
+        const isYouTube = videoUrl.hostname === 'www.youtube.com' ||
+                          videoUrl.hostname === 'youtube.com' ||
+                          videoUrl.hostname === 'youtu.be';
+        const isLoom = videoUrl.hostname === 'www.loom.com' ||
+                       videoUrl.hostname === 'loom.com';
+        videoValid = (isYouTube || isLoom) &&
+                     (videoUrl.protocol === 'https:' || videoUrl.protocol === 'http:');
+      } catch {
+        videoValid = false;
+      }
     }
 
     return (
@@ -526,7 +528,7 @@ export default function SubmitPage() {
       // Validate each provided link
       if (hasGithub && formData.githubUrl) {
         try {
-          const url = new URL(formData.githubUrl.trim());
+          const url = new URL(normalizeUrl(formData.githubUrl));
           if (url.hostname !== 'github.com' && url.hostname !== 'www.github.com') {
             reasons.push("Valid GitHub URL");
           } else if (url.protocol !== 'https:') {
@@ -541,7 +543,7 @@ export default function SubmitPage() {
 
       if (hasWebsite && formData.websiteUrl) {
         try {
-          const url = new URL(formData.websiteUrl.trim());
+          const url = new URL(normalizeUrl(formData.websiteUrl));
           if (url.protocol !== 'https:' && url.protocol !== 'http:') {
             reasons.push("Valid website URL");
           }
@@ -552,7 +554,7 @@ export default function SubmitPage() {
 
       if (hasArtifact && formData.artifactUrl) {
         try {
-          const url = new URL(formData.artifactUrl.trim());
+          const url = new URL(normalizeUrl(formData.artifactUrl));
           if (url.hostname !== 'claude.ai' || !url.pathname.startsWith('/artifacts/')) {
             reasons.push("Valid Claude artifact URL");
           }
@@ -562,21 +564,23 @@ export default function SubmitPage() {
       }
     }
 
-    // Validate video URL
-    try {
-      const videoUrl = new URL(formData.videoUrl.trim());
-      const isYouTube = videoUrl.hostname === 'www.youtube.com' ||
-                        videoUrl.hostname === 'youtube.com' ||
-                        videoUrl.hostname === 'youtu.be';
-      const isLoom = videoUrl.hostname === 'www.loom.com' ||
-                     videoUrl.hostname === 'loom.com';
-      if (!isYouTube && !isLoom) {
-        reasons.push("Valid YouTube or Loom URL");
-      } else if (videoUrl.protocol !== 'https:' && videoUrl.protocol !== 'http:') {
-        reasons.push("Valid video URL protocol");
+    // Validate video URL - only if provided
+    if (formData.videoUrl && formData.videoUrl.trim() !== '') {
+      try {
+        const videoUrl = new URL(normalizeUrl(formData.videoUrl));
+        const isYouTube = videoUrl.hostname === 'www.youtube.com' ||
+                          videoUrl.hostname === 'youtube.com' ||
+                          videoUrl.hostname === 'youtu.be';
+        const isLoom = videoUrl.hostname === 'www.loom.com' ||
+                       videoUrl.hostname === 'loom.com';
+        if (!isYouTube && !isLoom) {
+          reasons.push("Valid YouTube or Loom URL");
+        } else if (videoUrl.protocol !== 'https:' && videoUrl.protocol !== 'http:') {
+          reasons.push("Valid video URL protocol");
+        }
+      } catch {
+        reasons.push("Valid video URL");
       }
-    } catch {
-      reasons.push("Valid video URL");
     }
 
     if (formData.description.length < 50) reasons.push("Description (50+ chars)");
