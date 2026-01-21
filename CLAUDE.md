@@ -41,10 +41,14 @@ vercel --prod            # Manual deployment (if needed)
 - Project Name (max 100 chars, required)
 - Builder Name (max 50 chars, required)
 - School (dropdown of 84 universities + "Other" with custom input, required)
-- GitHub URL (validates https://github.com/username/repo format, required)
+- GitHub URL (validates https://github.com/username/repo format, optional)
+- Website URL (validates HTTP/HTTPS protocol, optional)
+- Claude Artifact URL (validates claude.ai/artifacts/* format, optional)
 - Video Demo URL (YouTube or Loom only, validates hostname + protocol, required)
 - Description (50-250 chars with live counter, required)
 - Tags (multi-select from 6 options, at least 1 required)
+
+**Note:** At least one project link (GitHub, Website, or Artifact) must be provided.
 
 **Security Features:**
 - Proper URL validation using `new URL()` parser
@@ -70,9 +74,13 @@ vercel --prod            # Manual deployment (if needed)
 - `school: string` - School/university
 - `description: string` - Project description
 - `tags: string[]` - Category tags (productivity, automation, creative, tool, data analysis, game)
-- `githubUrl: string` - Link to source code
+- `githubUrl?: string` - Link to source code (optional)
+- `websiteUrl?: string` - Link to deployed website (optional)
+- `artifactUrl?: string` - Link to Claude artifact (optional)
 - `videoUrl: string` - YouTube or Loom demo URL
 - `colorClass: string` - Background color (bg-warm-pink, bg-warm-green, bg-warm-blue, bg-warm-coral, bg-warm-lavender)
+
+**Note:** At least one project link (githubUrl, websiteUrl, or artifactUrl) should be provided.
 
 **Features:**
 - Integrated VideoModal for in-page video playback
@@ -129,7 +137,9 @@ vercel --prod            # Manual deployment (if needed)
       "projectName": "string",                  // Max 100 chars
       "builderName": "string",                  // Max 50 chars
       "school": "string",                       // University name
-      "githubUrl": "string",                    // https://github.com/username/repo
+      "githubUrl": "string",                    // OPTIONAL - https://github.com/username/repo
+      "websiteUrl": "string",                   // OPTIONAL - Deployed website URL
+      "artifactUrl": "string",                  // OPTIONAL - Claude artifact URL
       "videoUrl": "string",                     // YouTube or Loom URL
       "description": "string",                  // 50-250 chars
       "tags": ["string"],                       // Array of tags
@@ -139,6 +149,8 @@ vercel --prod            # Manual deployment (if needed)
   ]
 }
 ```
+
+**Important:** At least one project link (githubUrl, websiteUrl, or artifactUrl) must be provided.
 
 **Available Tags:**
 - productivity

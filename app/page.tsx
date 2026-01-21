@@ -1,10 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import BuildCard from "../components/BuildCard";
 import FilterBar from "../components/FilterBar";
 import buildsData from "../data/builds.json";
+
+interface Build {
+  id: string;
+  projectName: string;
+  builderName: string;
+  school: string;
+  githubUrl?: string;
+  websiteUrl?: string;
+  artifactUrl?: string;
+  videoUrl: string;
+  description: string;
+  tags: string[];
+  submittedAt: string;
+  featured: boolean;
+}
 
 const cardColors = [
   "bg-warm-pink",
@@ -17,6 +32,24 @@ const cardColors = [
 export default function Home() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [dynamicBuilds, setDynamicBuilds] = useState<Build[]>([]);
+
+  // Load dynamic builds from API on mount
+  useEffect(() => {
+    const loadBuilds = async () => {
+      try {
+        const response = await fetch('/api/submit');
+        if (response.ok) {
+          const kvBuilds = await response.json();
+          setDynamicBuilds(kvBuilds);
+        }
+      } catch (error) {
+        console.error('Failed to load dynamic builds:', error);
+      }
+    };
+
+    loadBuilds();
+  }, []);
 
   const handleTagToggle = (tag: string) => {
     setSelectedTags((prev) =>
@@ -29,7 +62,17 @@ export default function Home() {
     setSearchQuery("");
   };
 
-  const sortedBuilds = [...buildsData.builds].sort(
+  // Merge dynamic builds from KV with static builds from JSON
+  // Deduplicate by ID (KV builds take precedence)
+  const allBuilds = [
+    ...dynamicBuilds,
+    ...(buildsData.builds as Build[]).filter(
+      (staticBuild) => !dynamicBuilds.some((kvBuild) => kvBuild.id === staticBuild.id)
+    ),
+  ];
+
+  // Sort by submission date (newest first)
+  const sortedBuilds = [...allBuilds].sort(
     (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
   );
 
@@ -123,6 +166,8 @@ export default function Home() {
                 description={build.description}
                 tags={build.tags}
                 githubUrl={build.githubUrl}
+                websiteUrl={build.websiteUrl}
+                artifactUrl={build.artifactUrl}
                 videoUrl={build.videoUrl}
                 colorClass={cardColors[index % cardColors.length]}
               />

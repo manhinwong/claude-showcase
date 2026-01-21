@@ -9,7 +9,9 @@ interface BuildCardProps {
   school: string;
   description: string;
   tags: string[];
-  githubUrl: string;
+  githubUrl?: string;
+  websiteUrl?: string;
+  artifactUrl?: string;
   videoUrl: string;
   colorClass?: string;
 }
@@ -49,6 +51,8 @@ export default function BuildCard({
   description,
   tags,
   githubUrl,
+  websiteUrl,
+  artifactUrl,
   videoUrl,
   colorClass = "bg-warm-pink",
 }: BuildCardProps) {
@@ -96,20 +100,49 @@ export default function BuildCard({
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
+            {/* Primary: Video Demo */}
             <button
               onClick={() => setIsModalOpen(true)}
               className="flex-1 flex items-center justify-center min-h-[48px] sm:min-h-[44px] px-5 py-3 bg-warm-coral text-white text-sm font-semibold rounded-xl hover:bg-[#c47a5f] active:bg-[#b86f55] transition-colors shadow-md"
             >
               View Demo
             </button>
-            <a
-              href={githubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center min-h-[48px] sm:min-h-[44px] px-5 py-3 bg-[#F7F5F2] text-warm-text text-sm font-semibold rounded-xl hover:bg-[#EBE8E1] active:bg-[#DDD9D0] transition-colors border border-warm-text/10"
-            >
-              View Code
-            </a>
+
+            {/* Secondary: GitHub (if provided) */}
+            {githubUrl && (
+              <a
+                href={githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center min-h-[48px] sm:min-h-[44px] px-5 py-3 bg-[#F7F5F2] text-warm-text text-sm font-semibold rounded-xl hover:bg-[#EBE8E1] active:bg-[#DDD9D0] transition-colors border border-warm-text/10"
+              >
+                View Code
+              </a>
+            )}
+
+            {/* Secondary: Website (if provided) */}
+            {websiteUrl && (
+              <a
+                href={websiteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center min-h-[48px] sm:min-h-[44px] px-5 py-3 bg-[#F7F5F2] text-warm-text text-sm font-semibold rounded-xl hover:bg-[#EBE8E1] active:bg-[#DDD9D0] transition-colors border border-warm-text/10"
+              >
+                View Website
+              </a>
+            )}
+
+            {/* Secondary: Artifact (if provided) */}
+            {artifactUrl && (
+              <a
+                href={artifactUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center min-h-[48px] sm:min-h-[44px] px-5 py-3 bg-[#F7F5F2] text-warm-text text-sm font-semibold rounded-xl hover:bg-[#EBE8E1] active:bg-[#DDD9D0] transition-colors border border-warm-text/10"
+              >
+                View Artifact
+              </a>
+            )}
           </div>
         </div>
       </div>

@@ -71,6 +71,18 @@
       "tags": ["productivity", "tool"],
       "submittedAt": "2026-01-11",
       "featured": true
+    },
+    {
+      "id": "007",
+      "projectName": "Task Priority Matrix",
+      "builderName": "Jordan Kim",
+      "school": "Massachusetts Institute of Technology",
+      "artifactUrl": "https://claude.ai/artifacts/inspiration/c33e575f-5228-4058-aa78-a998bad7ec71",
+      "videoUrl": "https://www.loom.com/share/example123",
+      "description": "An interactive tool built with Claude that helps organize tasks using the Eisenhower Matrix. Drag and drop tasks into urgent/important quadrants for better prioritization.",
+      "tags": ["productivity", "tool"],
+      "submittedAt": "2026-01-20",
+      "featured": false
     }
   ]
 }

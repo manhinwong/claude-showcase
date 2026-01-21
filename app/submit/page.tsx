@@ -102,7 +102,9 @@ interface FormData {
   builderName: string;
   school: string;
   customSchool: string;
-  githubUrl: string;
+  githubUrl?: string;
+  websiteUrl?: string;
+  artifactUrl?: string;
   videoUrl: string;
   description: string;
   tags: string[];
@@ -114,9 +116,12 @@ interface FormErrors {
   school?: string;
   customSchool?: string;
   githubUrl?: string;
+  websiteUrl?: string;
+  artifactUrl?: string;
   videoUrl?: string;
   description?: string;
   tags?: string;
+  projectLinks?: string;
 }
 
 export default function SubmitPage() {
@@ -126,6 +131,8 @@ export default function SubmitPage() {
     school: "",
     customSchool: "",
     githubUrl: "",
+    websiteUrl: "",
+    artifactUrl: "",
     videoUrl: "",
     description: "",
     tags: [],
@@ -137,7 +144,7 @@ export default function SubmitPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
 
-  const validateField = (name: string, value: string | string[]): string | undefined => {
+  const validateField = (name: string, value: string | string[] | undefined): string | undefined => {
     switch (name) {
       case "projectName":
         if (!value || (value as string).trim() === "") {
@@ -171,24 +178,54 @@ export default function SubmitPage() {
         }
         break;
       case "githubUrl":
-        if (!value || (value as string).trim() === "") {
-          return "GitHub URL is required";
+        // Only validate if value is provided
+        if (value && (value as string).trim() !== "") {
+          try {
+            const url = new URL((value as string).trim());
+            if (url.hostname !== 'github.com' && url.hostname !== 'www.github.com') {
+              return "Please enter a valid GitHub URL";
+            }
+            if (url.protocol !== 'https:') {
+              return "GitHub URL must use HTTPS";
+            }
+            // Validate path format: /username/repo
+            const pathParts = url.pathname.split('/').filter(p => p.length > 0);
+            if (pathParts.length < 2) {
+              return "Please enter a complete GitHub repository URL (https://github.com/username/repo)";
+            }
+          } catch {
+            return "Please enter a valid URL";
+          }
         }
-        try {
-          const url = new URL((value as string).trim());
-          if (url.hostname !== 'github.com' && url.hostname !== 'www.github.com') {
-            return "Please enter a valid GitHub URL";
+        break;
+      case "websiteUrl":
+        if (value && (value as string).trim() !== "") {
+          try {
+            const url = new URL((value as string).trim());
+            if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+              return "Website URL must use HTTP or HTTPS";
+            }
+          } catch {
+            return "Please enter a valid URL";
           }
-          if (url.protocol !== 'https:') {
-            return "GitHub URL must use HTTPS";
+        }
+        break;
+      case "artifactUrl":
+        if (value && (value as string).trim() !== "") {
+          try {
+            const url = new URL((value as string).trim());
+            if (url.hostname !== 'claude.ai') {
+              return "Please enter a valid Claude artifact URL (claude.ai)";
+            }
+            if (!url.pathname.startsWith('/artifacts/')) {
+              return "Artifact URL must be in format: claude.ai/artifacts/...";
+            }
+            if (url.protocol !== 'https:') {
+              return "Artifact URL must use HTTPS";
+            }
+          } catch {
+            return "Please enter a valid URL";
           }
-          // Validate path format: /username/repo
-          const pathParts = url.pathname.split('/').filter(p => p.length > 0);
-          if (pathParts.length < 2) {
-            return "Please enter a complete GitHub repository URL (https://github.com/username/repo)";
-          }
-        } catch {
-          return "Please enter a valid URL";
         }
         break;
       case "videoUrl":
@@ -244,6 +281,17 @@ export default function SubmitPage() {
         isValid = false;
       }
     });
+
+    // Ensure at least one project link is provided
+    const hasAtLeastOneLink =
+      (formData.githubUrl && formData.githubUrl.trim() !== '') ||
+      (formData.websiteUrl && formData.websiteUrl.trim() !== '') ||
+      (formData.artifactUrl && formData.artifactUrl.trim() !== '');
+
+    if (!hasAtLeastOneLink) {
+      newErrors.projectLinks = "Please provide at least one project link (GitHub, Website, or Artifact)";
+      isValid = false;
+    }
 
     setErrors(newErrors);
     return isValid;
@@ -311,40 +359,63 @@ export default function SubmitPage() {
     if (validateForm()) {
       setIsSubmitting(true);
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      try {
+        // Prepare submission data with customSchool replacing "Other"
+        const submissionData = {
+          projectName: formData.projectName.trim(),
+          builderName: formData.builderName.trim(),
+          school: formData.school === "Other" ? formData.customSchool.trim() : formData.school,
+          ...(formData.githubUrl && { githubUrl: formData.githubUrl.trim() }),
+          ...(formData.websiteUrl && { websiteUrl: formData.websiteUrl.trim() }),
+          ...(formData.artifactUrl && { artifactUrl: formData.artifactUrl.trim() }),
+          videoUrl: formData.videoUrl.trim(),
+          description: formData.description.trim(),
+          tags: formData.tags,
+        };
 
-      // Prepare submission data with customSchool replacing "Other"
-      const submissionData = {
-        projectName: formData.projectName.trim(),
-        builderName: formData.builderName.trim(),
-        school: formData.school === "Other" ? formData.customSchool.trim() : formData.school,
-        githubUrl: formData.githubUrl.trim(),
-        videoUrl: formData.videoUrl.trim(),
-        description: formData.description.trim(),
-        tags: formData.tags,
-      };
+        // Call API endpoint
+        const response = await fetch('/api/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(submissionData),
+        });
 
-      // Only log in development
-      if (process.env.NODE_ENV === 'development') {
-        console.log("Form submission:", JSON.stringify(submissionData, null, 2));
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Submission failed');
+        }
+
+        // Only log in development
+        if (process.env.NODE_ENV === 'development') {
+          console.log("Form submission successful:", JSON.stringify(submissionData, null, 2));
+        }
+
+        setIsSubmitting(false);
+        setShowSuccessModal(true);
+
+        // Reset form
+        setFormData({
+          projectName: "",
+          builderName: "",
+          school: "",
+          customSchool: "",
+          githubUrl: "",
+          websiteUrl: "",
+          artifactUrl: "",
+          videoUrl: "",
+          description: "",
+          tags: [],
+        });
+        setErrors({});
+        setTouched({});
+      } catch (error) {
+        console.error('Submission error:', error);
+        setIsSubmitting(false);
+        setErrors({
+          ...errors,
+          projectName: error instanceof Error ? error.message : 'Failed to submit build. Please try again.'
+        });
       }
-
-      setIsSubmitting(false);
-      setShowSuccessModal(true);
-
-      setFormData({
-        projectName: "",
-        builderName: "Marcus Chen",
-        school: "",
-        customSchool: "",
-        githubUrl: "",
-        videoUrl: "",
-        description: "",
-        tags: [],
-      });
-      setErrors({});
-      setTouched({});
     }
   };
 
@@ -353,16 +424,49 @@ export default function SubmitPage() {
       formData.school !== "" &&
       (formData.school !== "Other" || formData.customSchool.trim() !== "");
 
-    // Validate GitHub URL properly
-    let githubValid = false;
-    try {
-      const githubUrl = new URL(formData.githubUrl.trim());
-      githubValid = (githubUrl.hostname === 'github.com' || githubUrl.hostname === 'www.github.com') &&
-                    githubUrl.protocol === 'https:' &&
-                    githubUrl.pathname.split('/').filter(p => p.length > 0).length >= 2;
-    } catch {
-      githubValid = false;
+    // At least one project link must be provided and valid
+    const hasGithub = !!(formData.githubUrl && formData.githubUrl.trim() !== '');
+    const hasWebsite = !!(formData.websiteUrl && formData.websiteUrl.trim() !== '');
+    const hasArtifact = !!(formData.artifactUrl && formData.artifactUrl.trim() !== '');
+
+    let githubValid = true;
+    if (hasGithub && formData.githubUrl) {
+      try {
+        const url = new URL(formData.githubUrl.trim());
+        githubValid = (url.hostname === 'github.com' || url.hostname === 'www.github.com') &&
+                      url.protocol === 'https:' &&
+                      url.pathname.split('/').filter(p => p.length > 0).length >= 2;
+      } catch {
+        githubValid = false;
+      }
     }
+
+    let websiteValid = true;
+    if (hasWebsite && formData.websiteUrl) {
+      try {
+        const url = new URL(formData.websiteUrl.trim());
+        websiteValid = url.protocol === 'https:' || url.protocol === 'http:';
+      } catch {
+        websiteValid = false;
+      }
+    }
+
+    let artifactValid = true;
+    if (hasArtifact && formData.artifactUrl) {
+      try {
+        const url = new URL(formData.artifactUrl.trim());
+        artifactValid = url.hostname === 'claude.ai' &&
+                       url.pathname.startsWith('/artifacts/') &&
+                       url.protocol === 'https:';
+      } catch {
+        artifactValid = false;
+      }
+    }
+
+    const hasAtLeastOneValidLink =
+      (hasGithub && githubValid) ||
+      (hasWebsite && websiteValid) ||
+      (hasArtifact && artifactValid);
 
     // Validate video URL properly
     let videoValid = false;
@@ -383,7 +487,7 @@ export default function SubmitPage() {
       formData.projectName.trim() !== "" &&
       formData.builderName.trim() !== "" &&
       schoolValid &&
-      githubValid &&
+      hasAtLeastOneValidLink &&
       videoValid &&
       formData.description.length >= 50 &&
       formData.description.length <= 250 &&
@@ -401,18 +505,51 @@ export default function SubmitPage() {
       reasons.push("Custom school name");
     }
 
-    // Validate GitHub URL
-    try {
-      const githubUrl = new URL(formData.githubUrl.trim());
-      if (githubUrl.hostname !== 'github.com' && githubUrl.hostname !== 'www.github.com') {
-        reasons.push("Valid GitHub URL");
-      } else if (githubUrl.protocol !== 'https:') {
-        reasons.push("GitHub URL must use HTTPS");
-      } else if (githubUrl.pathname.split('/').filter(p => p.length > 0).length < 2) {
-        reasons.push("Complete GitHub repo URL");
+    // Check if at least one project link is provided
+    const hasGithub = formData.githubUrl && formData.githubUrl.trim() !== '';
+    const hasWebsite = formData.websiteUrl && formData.websiteUrl.trim() !== '';
+    const hasArtifact = formData.artifactUrl && formData.artifactUrl.trim() !== '';
+
+    if (!hasGithub && !hasWebsite && !hasArtifact) {
+      reasons.push("At least one project link (GitHub/Website/Artifact)");
+    } else {
+      // Validate each provided link
+      if (hasGithub && formData.githubUrl) {
+        try {
+          const url = new URL(formData.githubUrl.trim());
+          if (url.hostname !== 'github.com' && url.hostname !== 'www.github.com') {
+            reasons.push("Valid GitHub URL");
+          } else if (url.protocol !== 'https:') {
+            reasons.push("GitHub URL must use HTTPS");
+          } else if (url.pathname.split('/').filter(p => p.length > 0).length < 2) {
+            reasons.push("Complete GitHub repo URL");
+          }
+        } catch {
+          reasons.push("Valid GitHub URL");
+        }
       }
-    } catch {
-      reasons.push("Valid GitHub URL");
+
+      if (hasWebsite && formData.websiteUrl) {
+        try {
+          const url = new URL(formData.websiteUrl.trim());
+          if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+            reasons.push("Valid website URL");
+          }
+        } catch {
+          reasons.push("Valid website URL");
+        }
+      }
+
+      if (hasArtifact && formData.artifactUrl) {
+        try {
+          const url = new URL(formData.artifactUrl.trim());
+          if (url.hostname !== 'claude.ai' || !url.pathname.startsWith('/artifacts/')) {
+            reasons.push("Valid Claude artifact URL");
+          }
+        } catch {
+          reasons.push("Valid artifact URL");
+        }
+      }
     }
 
     // Validate video URL
@@ -712,7 +849,7 @@ export default function SubmitPage() {
                 htmlFor="githubUrl"
                 className="block text-sm font-semibold text-warm-text mb-2"
               >
-                GitHub URL <span className="text-warm-coral">*</span>
+                GitHub URL
               </label>
               <input
                 type="url"
@@ -728,16 +865,80 @@ export default function SubmitPage() {
                     : "border-transparent focus:border-warm-coral"
                 }`}
               />
-              {errors.githubUrl && touched.githubUrl ? (
+              {errors.githubUrl && touched.githubUrl && (
                 <p className="mt-2 text-sm text-red-500 flex items-center gap-1.5">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
                   {errors.githubUrl}
                 </p>
+              )}
+            </div>
+
+            {/* Website URL */}
+            <div>
+              <label
+                htmlFor="websiteUrl"
+                className="block text-sm font-semibold text-warm-text mb-2"
+              >
+                Website URL
+              </label>
+              <input
+                type="url"
+                id="websiteUrl"
+                name="websiteUrl"
+                value={formData.websiteUrl}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                placeholder="https://myproject.com"
+                className={`w-full px-4 py-3.5 text-base text-warm-text bg-warm-bg border-2 rounded-xl placeholder:text-warm-text/40 focus:outline-none transition-colors ${
+                  errors.websiteUrl && touched.websiteUrl
+                    ? "border-red-400 focus:border-red-400"
+                    : "border-transparent focus:border-warm-coral"
+                }`}
+              />
+              {errors.websiteUrl && touched.websiteUrl && (
+                <p className="mt-2 text-sm text-red-500 flex items-center gap-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {errors.websiteUrl}
+                </p>
+              )}
+            </div>
+
+            {/* Artifact URL */}
+            <div>
+              <label
+                htmlFor="artifactUrl"
+                className="block text-sm font-semibold text-warm-text mb-2"
+              >
+                Claude Artifact URL
+              </label>
+              <input
+                type="url"
+                id="artifactUrl"
+                name="artifactUrl"
+                value={formData.artifactUrl}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                placeholder="https://claude.ai/artifacts/..."
+                className={`w-full px-4 py-3.5 text-base text-warm-text bg-warm-bg border-2 rounded-xl placeholder:text-warm-text/40 focus:outline-none transition-colors ${
+                  errors.artifactUrl && touched.artifactUrl
+                    ? "border-red-400 focus:border-red-400"
+                    : "border-transparent focus:border-warm-coral"
+                }`}
+              />
+              {errors.artifactUrl && touched.artifactUrl ? (
+                <p className="mt-2 text-sm text-red-500 flex items-center gap-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {errors.artifactUrl}
+                </p>
               ) : (
                 <p className="mt-2 text-sm text-warm-text/50">
-                  Example: https://github.com/username/repo-name
+                  At least one project link is required (GitHub, Website, or Artifact)
                 </p>
               )}
             </div>
