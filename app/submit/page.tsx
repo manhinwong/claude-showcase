@@ -214,10 +214,7 @@ export default function SubmitPage() {
         if (value && (value as string).trim() !== "") {
           try {
             const normalizedUrl = normalizeUrl((value as string));
-            const url = new URL(normalizedUrl);
-            if (url.protocol !== 'https:' && url.protocol !== 'http:') {
-              return "Website URL must use HTTP or HTTPS";
-            }
+            new URL(normalizedUrl);
           } catch {
             return "Please enter a valid URL";
           }
@@ -454,8 +451,7 @@ export default function SubmitPage() {
     let websiteValid = true;
     if (hasWebsite && formData.websiteUrl) {
       try {
-        const url = new URL(normalizeUrl(formData.websiteUrl));
-        websiteValid = url.protocol === 'https:' || url.protocol === 'http:';
+        new URL(normalizeUrl(formData.websiteUrl));
       } catch {
         websiteValid = false;
       }
@@ -543,10 +539,7 @@ export default function SubmitPage() {
 
       if (hasWebsite && formData.websiteUrl) {
         try {
-          const url = new URL(normalizeUrl(formData.websiteUrl));
-          if (url.protocol !== 'https:' && url.protocol !== 'http:') {
-            reasons.push("Valid website URL");
-          }
+          new URL(normalizeUrl(formData.websiteUrl));
         } catch {
           reasons.push("Valid website URL");
         }
