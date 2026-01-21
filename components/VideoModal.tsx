@@ -9,7 +9,7 @@ interface VideoModalProps {
   onClose: () => void;
 }
 
-function parseVideoUrl(url: string): { type: "youtube" | "loom" | null; embedUrl: string | null } {
+function parseVideoUrl(url: string | undefined): { type: "youtube" | "loom" | null; embedUrl: string | null } {
   if (!url) return { type: null, embedUrl: null };
 
   // YouTube formats:
