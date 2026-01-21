@@ -124,6 +124,17 @@ interface FormErrors {
   projectLinks?: string;
 }
 
+// Helper function to normalize URLs - adds https:// if no protocol provided
+const normalizeUrl = (urlString: string): string => {
+  if (!urlString.trim()) return "";
+  const trimmed = urlString.trim();
+  // If URL doesn't start with http:// or https://, add https://
+  if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+    return `https://${trimmed}`;
+  }
+  return trimmed;
+};
+
 export default function SubmitPage() {
   const [formData, setFormData] = useState<FormData>({
     projectName: "",
@@ -181,7 +192,8 @@ export default function SubmitPage() {
         // Only validate if value is provided
         if (value && (value as string).trim() !== "") {
           try {
-            const url = new URL((value as string).trim());
+            const normalizedUrl = normalizeUrl((value as string));
+            const url = new URL(normalizedUrl);
             if (url.hostname !== 'github.com' && url.hostname !== 'www.github.com') {
               return "Please enter a valid GitHub URL";
             }
@@ -191,7 +203,7 @@ export default function SubmitPage() {
             // Validate path format: /username/repo
             const pathParts = url.pathname.split('/').filter(p => p.length > 0);
             if (pathParts.length < 2) {
-              return "Please enter a complete GitHub repository URL (https://github.com/username/repo)";
+              return "Please enter a complete GitHub repository URL (github.com/username/repo)";
             }
           } catch {
             return "Please enter a valid URL";
@@ -201,7 +213,8 @@ export default function SubmitPage() {
       case "websiteUrl":
         if (value && (value as string).trim() !== "") {
           try {
-            const url = new URL((value as string).trim());
+            const normalizedUrl = normalizeUrl((value as string));
+            const url = new URL(normalizedUrl);
             if (url.protocol !== 'https:' && url.protocol !== 'http:') {
               return "Website URL must use HTTP or HTTPS";
             }
@@ -213,7 +226,8 @@ export default function SubmitPage() {
       case "artifactUrl":
         if (value && (value as string).trim() !== "") {
           try {
-            const url = new URL((value as string).trim());
+            const normalizedUrl = normalizeUrl((value as string));
+            const url = new URL(normalizedUrl);
             if (url.hostname !== 'claude.ai') {
               return "Please enter a valid Claude artifact URL (claude.ai)";
             }
@@ -233,7 +247,8 @@ export default function SubmitPage() {
           return "Video demo URL is required";
         }
         try {
-          const url = new URL((value as string).trim());
+          const normalizedUrl = normalizeUrl((value as string));
+          const url = new URL(normalizedUrl);
           const isYouTube = url.hostname === 'www.youtube.com' ||
                             url.hostname === 'youtube.com' ||
                             url.hostname === 'youtu.be';
@@ -365,10 +380,10 @@ export default function SubmitPage() {
           projectName: formData.projectName.trim(),
           builderName: formData.builderName.trim(),
           school: formData.school === "Other" ? formData.customSchool.trim() : formData.school,
-          ...(formData.githubUrl && { githubUrl: formData.githubUrl.trim() }),
-          ...(formData.websiteUrl && { websiteUrl: formData.websiteUrl.trim() }),
-          ...(formData.artifactUrl && { artifactUrl: formData.artifactUrl.trim() }),
-          videoUrl: formData.videoUrl.trim(),
+          ...(formData.githubUrl && { githubUrl: normalizeUrl(formData.githubUrl) }),
+          ...(formData.websiteUrl && { websiteUrl: normalizeUrl(formData.websiteUrl) }),
+          ...(formData.artifactUrl && { artifactUrl: normalizeUrl(formData.artifactUrl) }),
+          videoUrl: normalizeUrl(formData.videoUrl),
           description: formData.description.trim(),
           tags: formData.tags,
         };
