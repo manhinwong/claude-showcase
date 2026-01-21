@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import BuildCard from "../components/BuildCard";
 import FilterBar from "../components/FilterBar";
-import buildsData from "../data/builds.json";
 
 interface Build {
   id: string;
@@ -32,23 +31,26 @@ const cardColors = [
 export default function Home() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [dynamicBuilds, setDynamicBuilds] = useState<Build[]>([]);
+  const [allBuilds, setAllBuilds] = useState<Build[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Load dynamic builds from API on mount
+  // Fetch builds from API
   useEffect(() => {
-    const loadBuilds = async () => {
+    const fetchBuilds = async () => {
       try {
         const response = await fetch('/api/submit');
         if (response.ok) {
-          const kvBuilds = await response.json();
-          setDynamicBuilds(kvBuilds);
+          const data = await response.json();
+          setAllBuilds(data);
         }
       } catch (error) {
-        console.error('Failed to load dynamic builds:', error);
+        console.error('Error fetching builds:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    loadBuilds();
+    fetchBuilds();
   }, []);
 
   const handleTagToggle = (tag: string) => {
@@ -61,15 +63,6 @@ export default function Home() {
     setSelectedTags([]);
     setSearchQuery("");
   };
-
-  // Merge dynamic builds from KV with static builds from JSON
-  // Deduplicate by ID (KV builds take precedence)
-  const allBuilds = [
-    ...dynamicBuilds,
-    ...(buildsData.builds as Build[]).filter(
-      (staticBuild) => !dynamicBuilds.some((kvBuild) => kvBuild.id === staticBuild.id)
-    ),
-  ];
 
   // Sort by submission date (newest first)
   const sortedBuilds = [...allBuilds].sort(

@@ -373,7 +373,7 @@ export default function SubmitPage() {
           tags: formData.tags,
         };
 
-        // Call API endpoint
+        // Call API endpoint to save submission
         const response = await fetch('/api/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -383,11 +383,6 @@ export default function SubmitPage() {
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.error || 'Submission failed');
-        }
-
-        // Only log in development
-        if (process.env.NODE_ENV === 'development') {
-          console.log("Form submission successful:", JSON.stringify(submissionData, null, 2));
         }
 
         setIsSubmitting(false);
