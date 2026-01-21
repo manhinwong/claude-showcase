@@ -3,7 +3,7 @@
 import { useEffect, useRef, useCallback } from "react";
 
 interface VideoModalProps {
-  videoUrl: string;
+  videoUrl?: string;
   projectName: string;
   isOpen: boolean;
   onClose: () => void;

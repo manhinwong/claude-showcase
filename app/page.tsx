@@ -13,7 +13,7 @@ interface Build {
   githubUrl?: string;
   websiteUrl?: string;
   artifactUrl?: string;
-  videoUrl: string;
+  videoUrl?: string;
   description: string;
   tags: string[];
   submittedAt: string;

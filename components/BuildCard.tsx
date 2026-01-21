@@ -12,7 +12,7 @@ interface BuildCardProps {
   githubUrl?: string;
   websiteUrl?: string;
   artifactUrl?: string;
-  videoUrl: string;
+  videoUrl?: string;
   colorClass?: string;
 }
 
@@ -100,13 +100,15 @@ export default function BuildCard({
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
-            {/* Primary: Video Demo */}
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="flex-1 flex items-center justify-center min-h-[48px] sm:min-h-[44px] px-5 py-3 bg-warm-coral text-white text-sm font-semibold rounded-xl hover:bg-[#c47a5f] active:bg-[#b86f55] transition-colors shadow-md"
-            >
-              View Demo
-            </button>
+            {/* Primary: Video Demo (if provided) */}
+            {videoUrl && (
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="flex-1 flex items-center justify-center min-h-[48px] sm:min-h-[44px] px-5 py-3 bg-warm-coral text-white text-sm font-semibold rounded-xl hover:bg-[#c47a5f] active:bg-[#b86f55] transition-colors shadow-md"
+              >
+                View Demo
+              </button>
+            )}
 
             {/* Secondary: GitHub (if provided) */}
             {githubUrl && (

@@ -105,7 +105,7 @@ interface FormData {
   githubUrl?: string;
   websiteUrl?: string;
   artifactUrl?: string;
-  videoUrl: string;
+  videoUrl?: string;
   description: string;
   tags: string[];
 }
@@ -243,26 +243,26 @@ export default function SubmitPage() {
         }
         break;
       case "videoUrl":
-        if (!value || (value as string).trim() === "") {
-          return "Video demo URL is required";
-        }
-        try {
-          const normalizedUrl = normalizeUrl((value as string));
-          const url = new URL(normalizedUrl);
-          const isYouTube = url.hostname === 'www.youtube.com' ||
-                            url.hostname === 'youtube.com' ||
-                            url.hostname === 'youtu.be';
-          const isLoom = url.hostname === 'www.loom.com' ||
-                         url.hostname === 'loom.com';
+        // Video URL is optional - only validate if provided
+        if (value && (value as string).trim() !== "") {
+          try {
+            const normalizedUrl = normalizeUrl((value as string));
+            const url = new URL(normalizedUrl);
+            const isYouTube = url.hostname === 'www.youtube.com' ||
+                              url.hostname === 'youtube.com' ||
+                              url.hostname === 'youtu.be';
+            const isLoom = url.hostname === 'www.loom.com' ||
+                           url.hostname === 'loom.com';
 
-          if (!isYouTube && !isLoom) {
-            return "Please enter a valid YouTube or Loom URL";
+            if (!isYouTube && !isLoom) {
+              return "Please enter a valid YouTube or Loom URL";
+            }
+            if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+              return "URL must use HTTP or HTTPS";
+            }
+          } catch {
+            return "Please enter a valid URL";
           }
-          if (url.protocol !== 'https:' && url.protocol !== 'http:') {
-            return "URL must use HTTP or HTTPS";
-          }
-        } catch {
-          return "Please enter a valid URL";
         }
         break;
       case "description":
@@ -383,7 +383,7 @@ export default function SubmitPage() {
           ...(formData.githubUrl && { githubUrl: normalizeUrl(formData.githubUrl) }),
           ...(formData.websiteUrl && { websiteUrl: normalizeUrl(formData.websiteUrl) }),
           ...(formData.artifactUrl && { artifactUrl: normalizeUrl(formData.artifactUrl) }),
-          videoUrl: normalizeUrl(formData.videoUrl),
+          ...(formData.videoUrl && { videoUrl: normalizeUrl(formData.videoUrl) }),
           description: formData.description.trim(),
           tags: formData.tags,
         };
@@ -959,7 +959,7 @@ export default function SubmitPage() {
                 htmlFor="videoUrl"
                 className="block text-sm font-semibold text-warm-text mb-2"
               >
-                Video Demo URL <span className="text-warm-coral">*</span>
+                Video Demo URL <span className="text-warm-text/50 font-normal">(optional)</span>
               </label>
               <input
                 type="url"

@@ -10,7 +10,7 @@ interface SubmittedBuild {
   githubUrl?: string;
   websiteUrl?: string;
   artifactUrl?: string;
-  videoUrl: string;
+  videoUrl?: string;
   description: string;
   tags: string[];
   submittedAt: string;
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Validate required fields
-    if (!body.projectName || !body.builderName || !body.school || !body.videoUrl || !body.description || !body.tags) {
+    if (!body.projectName || !body.builderName || !body.school || !body.description || !body.tags) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -71,7 +71,6 @@ export async function POST(request: NextRequest) {
       projectName: body.projectName,
       builderName: body.builderName,
       school: body.school,
-      videoUrl: body.videoUrl,
       description: body.description,
       tags: body.tags,
       submittedAt: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
@@ -87,6 +86,9 @@ export async function POST(request: NextRequest) {
     }
     if (body.artifactUrl) {
       newBuild.artifactUrl = body.artifactUrl;
+    }
+    if (body.videoUrl) {
+      newBuild.videoUrl = body.videoUrl;
     }
 
     // Add new build to array
