@@ -136,7 +136,13 @@ export default function Home() {
           />
         </div>
 
-        {filteredBuilds.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center py-16">
+            <p className="text-lg text-warm-text/60 font-sans">
+              Loading projects...
+            </p>
+          </div>
+        ) : filteredBuilds.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-lg text-warm-text/60 font-sans">
               No projects match your filters.
