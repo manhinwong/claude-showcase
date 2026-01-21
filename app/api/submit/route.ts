@@ -1,6 +1,6 @@
+import { kv } from '@vercel/kv';
 import { NextRequest, NextResponse } from 'next/server';
-import { readFile, writeFile } from 'fs/promises';
-import { join } from 'path';
+import buildsData from '../../../data/builds.json';
 
 interface SubmittedBuild {
   id: string;
@@ -17,24 +17,27 @@ interface SubmittedBuild {
   featured: boolean;
 }
 
-interface BuildsData {
-  builds: SubmittedBuild[];
-}
-
-// GET: Retrieve all builds from builds.json
+// GET: Retrieve all builds from KV and merge with static builds.json
 export async function GET() {
   try {
-    const buildsPath = join(process.cwd(), 'data', 'builds.json');
-    const fileContent = await readFile(buildsPath, 'utf-8');
-    const buildsData: BuildsData = JSON.parse(fileContent);
-    return NextResponse.json(buildsData.builds);
+    const kvBuilds = await kv.get<SubmittedBuild[]>('builds:all') || [];
+    const staticBuilds = buildsData.builds as SubmittedBuild[];
+
+    // Merge: KV builds + static builds (deduplicate by ID, KV takes precedence)
+    const kvIds = new Set(kvBuilds.map(b => b.id));
+    const mergedBuilds = [
+      ...kvBuilds,
+      ...staticBuilds.filter(sb => !kvIds.has(sb.id))
+    ];
+
+    return NextResponse.json(mergedBuilds);
   } catch (error) {
     console.error('Error fetching builds:', error);
     return NextResponse.json({ error: 'Failed to fetch builds' }, { status: 500 });
   }
 }
 
-// POST: Save new submission to builds.json
+// POST: Save new submission to KV
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -54,15 +57,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'At least one tag is required' }, { status: 400 });
     }
 
-    // Read current builds.json file
-    const buildsPath = join(process.cwd(), 'data', 'builds.json');
-    const fileContent = await readFile(buildsPath, 'utf-8');
-    const buildsData: BuildsData = JSON.parse(fileContent);
+    // Get all existing builds to generate new ID
+    const kvBuilds = await kv.get<SubmittedBuild[]>('builds:all') || [];
+    const staticBuilds = buildsData.builds as SubmittedBuild[];
 
-    // Generate next ID (pad to 3 digits)
-    const maxId = buildsData.builds.length > 0
-      ? Math.max(...buildsData.builds.map(b => parseInt(b.id, 10)))
-      : 0;
+    // Generate next ID based on max from both KV and static builds
+    const allIds = [
+      ...kvBuilds.map(b => parseInt(b.id, 10)),
+      ...staticBuilds.map(b => parseInt(b.id, 10))
+    ];
+    const maxId = allIds.length > 0 ? Math.max(...allIds) : 0;
     const newId = String(maxId + 1).padStart(3, '0');
 
     // Create build object with only provided fields
@@ -91,11 +95,9 @@ export async function POST(request: NextRequest) {
       newBuild.videoUrl = body.videoUrl;
     }
 
-    // Add new build to array
-    buildsData.builds.push(newBuild);
-
-    // Write updated builds.json
-    await writeFile(buildsPath, JSON.stringify(buildsData, null, 2));
+    // Store updated builds array in KV (only KV builds, not static)
+    const updatedBuilds = [...kvBuilds, newBuild];
+    await kv.set('builds:all', updatedBuilds);
 
     return NextResponse.json({ success: true, id: newId }, { status: 201 });
   } catch (error) {

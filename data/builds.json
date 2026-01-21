@@ -8,7 +8,9 @@
       "githubUrl": "https://github.com/manhinwong/postcards-demo/",
       "videoUrl": "https://www.loom.com/share/806fb18140194bb2997cd51289c8c422",
       "description": "A web app for creating personalized digital postcards with photos, messages, and memories. Customization coming soon!",
-      "tags": ["creative"],
+      "tags": [
+        "creative"
+      ],
       "submittedAt": "2026-01-16",
       "featured": true
     },
@@ -20,7 +22,10 @@
       "githubUrl": "https://github.com/example/ai-story-generator",
       "videoUrl": "https://youtu.be/dQw4w9WgXcQ",
       "description": "An interactive storytelling application that uses AI to generate creative narratives based on user prompts. Features multiple genres and customizable story parameters for endless creative possibilities.",
-      "tags": ["creative", "tool"],
+      "tags": [
+        "creative",
+        "tool"
+      ],
       "submittedAt": "2026-01-15",
       "featured": false
     },
@@ -32,7 +37,10 @@
       "githubUrl": "https://github.com/example/data-viz-dashboard",
       "videoUrl": "https://www.loom.com/share/abc123def456",
       "description": "A real-time data visualization dashboard that transforms complex datasets into interactive charts and graphs. Built for data scientists and analysts who need quick insights from their data.",
-      "tags": ["data analysis", "tool"],
+      "tags": [
+        "data analysis",
+        "tool"
+      ],
       "submittedAt": "2026-01-14",
       "featured": true
     },
@@ -44,7 +52,11 @@
       "githubUrl": "https://github.com/example/code-review-assistant",
       "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       "description": "An automated code review tool that analyzes pull requests and provides intelligent feedback on code quality, potential bugs, and best practices. Integrates seamlessly with GitHub workflows.",
-      "tags": ["productivity", "automation", "tool"],
+      "tags": [
+        "productivity",
+        "automation",
+        "tool"
+      ],
       "submittedAt": "2026-01-13",
       "featured": false
     },
@@ -56,7 +68,10 @@
       "githubUrl": "https://github.com/example/pixel-art-creator",
       "videoUrl": "https://youtu.be/dQw4w9WgXcQ",
       "description": "A browser-based pixel art editor with intuitive tools for creating retro-style graphics. Features include layer support, color palettes, and export options for game development.",
-      "tags": ["creative", "game"],
+      "tags": [
+        "creative",
+        "game"
+      ],
       "submittedAt": "2026-01-12",
       "featured": false
     },
@@ -68,7 +83,10 @@
       "githubUrl": "https://github.com/example/meeting-notes-organizer",
       "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       "description": "Automatically transcribes and organizes meeting recordings into searchable, actionable notes with AI-powered summaries and action item extraction.",
-      "tags": ["productivity", "tool"],
+      "tags": [
+        "productivity",
+        "tool"
+      ],
       "submittedAt": "2026-01-11",
       "featured": true
     },
@@ -80,7 +98,10 @@
       "artifactUrl": "https://claude.ai/artifacts/inspiration/c33e575f-5228-4058-aa78-a998bad7ec71",
       "videoUrl": "https://www.loom.com/share/example123",
       "description": "An interactive tool built with Claude that helps organize tasks using the Eisenhower Matrix. Drag and drop tasks into urgent/important quadrants for better prioritization.",
-      "tags": ["productivity", "tool"],
+      "tags": [
+        "productivity",
+        "tool"
+      ],
       "submittedAt": "2026-01-20",
       "featured": false
     }
