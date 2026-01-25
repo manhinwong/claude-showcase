@@ -17,7 +17,12 @@ export const metadata: Metadata = {
   title: "Claude Showcase",
   description: "A gallery of builds created with Claude",
   icons: {
-    icon: "/favicon.png",
+    icon: [
+      {
+        url: "/favicon.png",
+        type: "image/png",
+      },
+    ],
   },
 };
 
